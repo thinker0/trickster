@@ -14,6 +14,7 @@
 package main
 
 import (
+	"strings"
 	"sync"
 	"time"
 
@@ -25,18 +26,21 @@ import (
 type RedisCache struct {
 	T         *TricksterHandler
 	Config    RedisCacheConfig
-	client    *redis.Client
+	client    *redis.ClusterClient
 	CacheKeys sync.Map
 }
 
 // Connect connects to the configured Redis endpoint
 func (r *RedisCache) Connect() error {
 	level.Info(r.T.Logger).Log("event", "connecting to redis", "protocol", r.Config.Protocol, "Endpoint", r.Config.Endpoint)
-	r.client = redis.NewClient(&redis.Options{
+	r.client = redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs: strings.Split(r.Config.Endpoint, ","),
+	})
+/*	r.client = redis.NewClient(&redis.Options{
 		Network: r.Config.Protocol,
 		Addr:    r.Config.Endpoint,
 	})
-	if r.Config.Password != "" {
+*/	if r.Config.Password != "" {
 		r.client.Options().Password = r.Config.Password
 	}
 	go r.Reap()
