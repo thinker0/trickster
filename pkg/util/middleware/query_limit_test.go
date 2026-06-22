@@ -22,9 +22,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/trickstercache/trickster/v2/pkg/backends"
 	bo "github.com/trickstercache/trickster/v2/pkg/backends/options"
+	"github.com/trickstercache/trickster/v2/pkg/observability/metrics"
 	tctx "github.com/trickstercache/trickster/v2/pkg/proxy/context"
 	"github.com/trickstercache/trickster/v2/pkg/proxy/request"
 	"github.com/trickstercache/trickster/v2/pkg/timeseries"
@@ -98,10 +100,12 @@ func TestLimitQueryRange(t *testing.T) {
 	})
 
 	t.Run("exceeds allowed limit", func(t *testing.T) {
+		metrics.ProxyQueryRangeRejected.Reset()
 		r := httptest.NewRequest(http.MethodGet, "/query", nil)
 		rec := httptest.NewRecorder()
 
 		backendOpts := &bo.Options{
+			Name:                  "test",
 			MaxQueryRange:         "14d",
 			MaxQueryRangeDuration: 14 * 24 * time.Hour,
 		}
@@ -126,5 +130,9 @@ func TestLimitQueryRange(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		assert.Contains(t, rec.Body.String(), "query time range exceeds the allowed limit of 14d")
+
+		// Verify metric is incremented
+		val := testutil.ToFloat64(metrics.ProxyQueryRangeRejected.WithLabelValues("test"))
+		assert.Equal(t, float64(1), val)
 	})
 }

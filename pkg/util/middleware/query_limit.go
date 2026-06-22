@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/trickstercache/trickster/v2/pkg/backends"
+	"github.com/trickstercache/trickster/v2/pkg/observability/metrics"
 	tctx "github.com/trickstercache/trickster/v2/pkg/proxy/context"
 	"github.com/trickstercache/trickster/v2/pkg/proxy/request"
 )
@@ -44,6 +45,7 @@ func LimitQueryRange(next http.Handler) http.Handler {
 			if err == nil && trq != nil {
 				duration := trq.Extent.End.Sub(trq.Extent.Start)
 				if duration > limit {
+					metrics.ProxyQueryRangeRejected.WithLabelValues(rsc.BackendOptions.Name).Inc()
 					http.Error(w, "query time range exceeds the allowed limit of "+rsc.BackendOptions.MaxQueryRange, http.StatusBadRequest)
 					return
 				}
