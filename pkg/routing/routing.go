@@ -226,10 +226,10 @@ func RegisterPathRoutes(r router.Router, conf *config.Config, handlers handlers.
 		h = attachAuthenticator(h, po1, o)
 		// attach compression handler
 		h = encoding.HandleCompression(h, o.CompressibleTypes)
-		// add Backend, Cache, and Path Configs to the HTTP Request's context
-		h = middleware.WithResourcesContext(client, o, c, po1, tr, h)
 		// limit query time range if configured
 		h = middleware.LimitQueryRange(h)
+		// add Backend, Cache, and Path Configs to the HTTP Request's context
+		h = middleware.WithResourcesContext(client, o, c, po1, tr, h)
 		// attach any request rewriters
 		if len(o.ReqRewriter) > 0 {
 			h = rewriter.Rewrite(o.ReqRewriter, h)
@@ -301,10 +301,10 @@ func RegisterDefaultBackendRoutes(r router.Router, conf *config.Config,
 		}
 		// attach authenticator
 		h = attachAuthenticator(h, po, o)
-		// add Backend, Cache, and Path Configs to the HTTP Request's context
-		h = middleware.WithResourcesContext(client, o, c, po, tr, h)
 		// limit query time range if configured
 		h = middleware.LimitQueryRange(h)
+		// add Backend, Cache, and Path Configs to the HTTP Request's context
+		h = middleware.WithResourcesContext(client, o, c, po, tr, h)
 		// attach any request rewriters
 		if len(o.ReqRewriter) > 0 {
 			h = rewriter.Rewrite(o.ReqRewriter, h)
