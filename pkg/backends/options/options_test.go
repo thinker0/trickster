@@ -425,6 +425,27 @@ func TestInitialize(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	// Test MaxQueryRange parsing
+	o3 := &Options{
+		MaxQueryRange: "14d",
+	}
+	err = o3.Initialize("test")
+	if err != nil {
+		t.Error(err)
+	}
+	if o3.MaxQueryRangeDuration != 14*24*time.Hour {
+		t.Errorf("expected 14d to parse as 336h, got %s", o3.MaxQueryRangeDuration)
+	}
+
+	// Test invalid MaxQueryRange duration
+	o4 := &Options{
+		MaxQueryRange: "invalid-duration",
+	}
+	err = o4.Initialize("test")
+	if err == nil {
+		t.Error("expected error for invalid max_query_range, got nil")
+	}
 }
 
 func TestValidateTLSConfigs(t *testing.T) {
