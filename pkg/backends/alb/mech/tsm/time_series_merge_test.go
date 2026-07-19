@@ -190,6 +190,7 @@ func TestLimitQueryRangeALB(t *testing.T) {
 				days = 15
 			}
 			return &timeseries.TimeRangeQuery{
+				Statement: "up",
 				Extent: timeseries.Extent{
 					Start: now.Add(-time.Duration(days) * 24 * time.Hour),
 					End:   now,
@@ -202,7 +203,7 @@ func TestLimitQueryRangeALB(t *testing.T) {
 	status := &healthcheck.Status{}
 	status.Set(healthcheck.StatusPassing)
 	target := pool.NewTarget(http.HandlerFunc(tu.BasicHTTPHandler), status, mockMemberBackend)
-	p := pool.New([]*pool.Target{target}, -1)
+	p := pool.New([]*pool.Target{target}, 1)
 	defer p.Stop()
 
 	h := &handler{mergePaths: []string{"/"}}
@@ -225,7 +226,7 @@ func TestLimitQueryRangeALB(t *testing.T) {
 	})
 
 	t.Run("exceeds limit", func(t *testing.T) {
-		metrics.ProxyQueryRangeRejected.Reset()
+		metrics.ProxyQueryRangeRejections.Reset()
 		r := albpool.NewParentGET(t)
 		r.Header.Set("X-Test-Range", "exceed")
 		rsc := request.NewResources(&bo.Options{
@@ -247,7 +248,7 @@ func TestLimitQueryRangeALB(t *testing.T) {
 		}
 
 		// Verify metric is incremented
-		val := testutil.ToFloat64(metrics.ProxyQueryRangeRejected.WithLabelValues("alb-test"))
+		val := testutil.ToFloat64(metrics.ProxyQueryRangeRejections.WithLabelValues("alb-test"))
 		if val != 1.0 {
 			t.Errorf("expected metric value to be 1.0, got %f", val)
 		}

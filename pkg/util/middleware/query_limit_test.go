@@ -100,7 +100,7 @@ func TestLimitQueryRange(t *testing.T) {
 	})
 
 	t.Run("exceeds allowed limit", func(t *testing.T) {
-		metrics.ProxyQueryRangeRejected.Reset()
+		metrics.ProxyQueryRangeRejections.Reset()
 		r := httptest.NewRequest(http.MethodGet, "/query", nil)
 		rec := httptest.NewRecorder()
 
@@ -132,7 +132,7 @@ func TestLimitQueryRange(t *testing.T) {
 		assert.Contains(t, rec.Body.String(), "query time range exceeds the allowed limit of 14d")
 
 		// Verify metric is incremented
-		val := testutil.ToFloat64(metrics.ProxyQueryRangeRejected.WithLabelValues("test"))
+		val := testutil.ToFloat64(metrics.ProxyQueryRangeRejections.WithLabelValues("test"))
 		assert.Equal(t, float64(1), val)
 	})
 }

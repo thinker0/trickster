@@ -320,12 +320,12 @@ var (
 		},
 	)
 
-	// ProxyQueryRangeRejected is a counter for requests rejected due to exceeding the max_query_range limit
-	ProxyQueryRangeRejected = prometheus.NewCounterVec(
+	// ProxyQueryRangeRejections is a counter for requests rejected due to exceeding the max_query_range limit
+	ProxyQueryRangeRejections = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: metricNamespace,
 			Subsystem: proxySubsystem,
-			Name:      "query_range_rejected_total",
+			Name:      "query_range_rejections_total",
 			Help:      "Trickster total number of queries rejected due to exceeding the max_query_range limit.",
 		},
 		[]string{"backend_name"},
@@ -552,7 +552,7 @@ func init() {
 	prometheus.MustRegister(ReloadSuccessesTotal)
 	prometheus.MustRegister(ReloadFailuresTotal)
 	prometheus.MustRegister(ReloadDurationSeconds)
-	prometheus.MustRegister(ProxyQueryRangeRejected)
+	prometheus.MustRegister(ProxyQueryRangeRejections)
 }
 
 // Handler returns the http handler for the listener
